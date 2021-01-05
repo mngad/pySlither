@@ -2,11 +2,9 @@ import pyautogui
 import time
 import cv2
 from PIL import ImageGrab
-
 import numpy as np
 import imutils
 
-dur=0.01
 
 
 def circle(mult):
@@ -171,8 +169,6 @@ try:
     loop_time = time.time()
     needle = cv2.imread("blob.png",cv2.IMREAD_UNCHANGED)
     while True:
-        #cv2.imshow("out", getScr())
-        #needle = toGray(needle)
         ogimg = getScr()
         cont, thresh = findSnek(ogimg)
         img, points = find(needle, ogimg,0.65,debug_mode='rectangles')
@@ -200,7 +196,5 @@ try:
         if cv2.waitKey(1) == ord('q'):
             cv2.destroyAllWindows()
             break
-        #hough(img)
-        #time.sleep(0.1)
 except KeyboardInterrupt:
     print('done')
