@@ -118,7 +118,7 @@ def find(needle_img, haystack_img, threshold=0.5, debug_mode=None,
     return haystack_img, points
 
 def getScr():
-    img = ImageGrab.grab(bbox=(50, 100,960,900))
+    img = ImageGrab.grab(bbox=(19, 91,970,1015))
     #910x 800
     # make image C_CONTIGUOUS to avoid errors that look like:
     #   File ... in draw_rectangles
@@ -159,7 +159,28 @@ def findSnek(img):
     imgray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     ret, thresh = cv2.threshold(imgray, 127, 255, 0)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #print(contours)
     return contours, thresh
+
+def avoidSnek(cont):
+    
+    #cont = imutils.grab_contours(cont)
+    viableSneks = []
+    pos = (0, 0)
+    for c in cont:
+
+        M = cv2.moments(c)
+        if M["m00"] != 0:
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+            pos = (cX, cY)
+            if(cX < 75 or cX >125):
+                if(cY < 75 or cY >125):
+                
+                    area = cv2.contourArea(c)
+                    if(area > 100):
+                        viableSneks.append(c)
+    return viableSneks
 
 try:
     midwidth = int(getScr().shape[1]/2)
@@ -171,12 +192,14 @@ try:
     while True:
         ogimg = getScr()
         cont, thresh = findSnek(ogimg)
+        contViable = avoidSnek(cont)
         img, points = find(needle, ogimg,0.65,debug_mode='rectangles')
-        cv2.drawContours(img, cont, -1, (0,255,0), 3)
+        cv2.drawContours(img, contViable, -1, (255,0,0), 3,offset=(midheight - 100,
+            midwidth- 100))
         clp = closestPoint(points)
         if (clp != (0, 0)):
             # _pause defaults to true, creates large slowdown
-            pyautogui.moveTo(clp[0]+50, clp[1]+100, _pause=False)
+            pyautogui.moveTo(clp[0]+19, clp[1]+91, _pause=False)
             marker_color = (255, 0, 255)
             marker_type = cv2.MARKER_CROSS
 
