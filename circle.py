@@ -152,10 +152,10 @@ def closestPoint(points):
     for point in points:
         #point = np.round(point).astype("int")
         p = distFrom(point[0],point[1])
-        if p < smolPoint and p > 1000:
+        if p < smolPoint and p > 100:
             smolPoint = p
             clP = (point[0],point[1])
-            print(p)
+            #print(p)
     return clP
 
 
@@ -164,23 +164,29 @@ try:
     #pyautogui.moveTo(460, 510, duration=0.25)
     #circle(mult=100) 
     loop_time = time.time()
+    needle = cv2.imread("blob.png",cv2.IMREAD_UNCHANGED)
     while True:
         #cv2.imshow("out", getScr())
-        needle = cv2.imread("blob.png",cv2.IMREAD_UNCHANGED)
         #needle = toGray(needle)
-        img, points = find(needle, getScr(),0.5,debug_mode='rectangles')
+        img, points = find(needle, getScr(),0.65,debug_mode='rectangles')
         clp = closestPoint(points)
-        pyautogui.moveTo(clp[0]+50, clp[1]+100, duration=0)
-        marker_color = (255, 0, 255)
-        marker_type = cv2.MARKER_CROSS
+        if (clp != (0, 0)):
+            # _pause defaults to true, creates large slowdown
+            pyautogui.moveTo(clp[0]+50, clp[1]+100, _pause=False)
+            marker_color = (255, 0, 255)
+            marker_type = cv2.MARKER_CROSS
 
-        cv2.drawMarker(img, (clp[0],clp[1]), 
-                       color=marker_color, markerType=marker_type, 
-                       markerSize=40, thickness=2)
+            cv2.drawMarker(img, (clp[0],clp[1]), 
+                           color=marker_color, markerType=marker_type, 
+                           markerSize=40, thickness=2)
+        else:
+            pyautogui.moveTo(460, 510, _pause=False) 
+            # _pause defaults to true, creates large slowdown
         
         print('FPS {}'.format(1 / (time.time() - loop_time)))
         loop_time = time.time()
         cv2.imshow("out", img)
+        cv2.moveWindow("out", 950,20);
         if cv2.waitKey(1) == ord('q'):
             cv2.destroyAllWindows()
             break
