@@ -69,22 +69,20 @@ def find(needle_img, haystack_img, threshold=0.5, debug_mode=None,
     locations = list(zip(*locations[::-1]))
     #print(locations)
 
-    # You'll notice a lot of overlapping rectangles get drawn. We can eliminate those redundant
-    # locations by using groupRectangles().
-    # First we need to create the list of [x, y, w, h] rectangles
     rectangles = []
     for loc in locations:
         rect = [int(loc[0]), int(loc[1]), needle_w, needle_h]
         # Add every box to the list twice in order to retain single (non-overlapping) boxes
         rectangles.append(rect)
         rectangles.append(rect)
+
+    # Stolen from: https://github.com/learncodebygaming/opencv_tutorials/tree/master/005_real_time
     # Apply group rectangles.
     # The groupThreshold parameter should usually be 1. If you put it at 0 then no grouping is
     # done. If you put it at 2 then an object needs at least 3 overlapping rectangles to appear
     # in the result. I've set eps to 0.5, which is:
     # "Relative difference between sides of the rectangles to merge them into a group."
     rectangles, weights = cv2.groupRectangles(rectangles, groupThreshold=1, eps=0.5)
-    #print(rectangles)
 
     points = []
     if len(rectangles):
@@ -101,18 +99,15 @@ def find(needle_img, haystack_img, threshold=0.5, debug_mode=None,
             # Determine the center position
             center_x = x + int(w/2)
             center_y = y + int(h/2)
-            # Save the points
             points.append((center_x, center_y))
 
             if debug_mode == 'rectangles':
                 # Determine the box position
                 top_left = (x, y)
                 bottom_right = (x + w, y + h)
-                # Draw the box
                 cv2.rectangle(haystack_img, top_left, bottom_right, color=line_color, 
                             lineType=line_type, thickness=2)
             elif debug_mode == 'points':
-                # Draw the center point
                 cv2.drawMarker(haystack_img, (center_x, center_y), 
                             color=marker_color, markerType=marker_type, 
                             markerSize=40, thickness=2)
@@ -158,9 +153,19 @@ def closestPoint(points):
             #print(p)
     return clP
 
+def findSnek(img):
+    midwidth = int(img.shape[1]/2)
+    midheight = int(img.shape[0]/2)
+    img = img[midwidth-100:midwidth+100, midheight-100:midheight+100]
 
+    imgray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    ret, thresh = cv2.threshold(imgray, 127, 255, 0)
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    return contours, thresh
 
 try:
+    midwidth = int(getScr().shape[1]/2)
+    midheight = int(getScr().shape[0]/2)
     #pyautogui.moveTo(460, 510, duration=0.25)
     #circle(mult=100) 
     loop_time = time.time()
@@ -168,7 +173,10 @@ try:
     while True:
         #cv2.imshow("out", getScr())
         #needle = toGray(needle)
-        img, points = find(needle, getScr(),0.65,debug_mode='rectangles')
+        ogimg = getScr()
+        cont, thresh = findSnek(ogimg)
+        img, points = find(needle, ogimg,0.65,debug_mode='rectangles')
+        cv2.drawContours(img, cont, -1, (0,255,0), 3)
         clp = closestPoint(points)
         if (clp != (0, 0)):
             # _pause defaults to true, creates large slowdown
@@ -180,13 +188,15 @@ try:
                            color=marker_color, markerType=marker_type, 
                            markerSize=40, thickness=2)
         else:
-            pyautogui.moveTo(460, 510, _pause=False) 
+            pyautogui.moveTo(midwidth, midheight, _pause=False) 
             # _pause defaults to true, creates large slowdown
         
         print('FPS {}'.format(1 / (time.time() - loop_time)))
         loop_time = time.time()
         cv2.imshow("out", img)
-        cv2.moveWindow("out", 950,20);
+        cv2.moveWindow("out", 950,20)
+        cv2.imshow("out2", thresh)
+        cv2.moveWindow("out2", 950,200)
         if cv2.waitKey(1) == ord('q'):
             cv2.destroyAllWindows()
             break
