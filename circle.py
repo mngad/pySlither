@@ -117,12 +117,12 @@ def find(needle_img, haystack_img, threshold=0.5, debug_mode=None,
                             color=marker_color, markerType=marker_type, 
                             markerSize=40, thickness=2)
 
-    if debug_mode:
-        cv2.imshow('Matches', haystack_img)
+    #if debug_mode:
+        #cv2.imshow('Matches', haystack_img)
         #cv.waitKey()
         #cv.imwrite('result_click_point.jpg', haystack_img)
 
-    return points
+    return haystack_img, points
 
 def getScr():
     img = ImageGrab.grab(bbox=(50, 100,960,900))
@@ -145,6 +145,21 @@ def toGray(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return gray
 
+def closestPoint(points):
+
+    smolPoint = 10000
+    clP = (0,0)
+    for point in points:
+        #point = np.round(point).astype("int")
+        p = distFrom(point[0],point[1])
+        if p < smolPoint and p > 1000:
+            smolPoint = p
+            clP = (point[0],point[1])
+            print(p)
+    return clP
+
+
+
 try:
     #pyautogui.moveTo(460, 510, duration=0.25)
     #circle(mult=100) 
@@ -153,11 +168,19 @@ try:
         #cv2.imshow("out", getScr())
         needle = cv2.imread("blob.png",cv2.IMREAD_UNCHANGED)
         #needle = toGray(needle)
-        find(needle, getScr(),0.5,debug_mode='rectangles')
+        img, points = find(needle, getScr(),0.5,debug_mode='rectangles')
+        clp = closestPoint(points)
+        pyautogui.moveTo(clp[0]+50, clp[1]+100, duration=0)
+        marker_color = (255, 0, 255)
+        marker_type = cv2.MARKER_CROSS
 
+        cv2.drawMarker(img, (clp[0],clp[1]), 
+                       color=marker_color, markerType=marker_type, 
+                       markerSize=40, thickness=2)
+        
         print('FPS {}'.format(1 / (time.time() - loop_time)))
         loop_time = time.time()
-
+        cv2.imshow("out", img)
         if cv2.waitKey(1) == ord('q'):
             cv2.destroyAllWindows()
             break
