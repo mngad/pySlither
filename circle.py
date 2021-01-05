@@ -1,6 +1,7 @@
 import pyautogui
 import time
 import cv2
+from PIL import ImageGrab
 
 import numpy as np
 import imutils
@@ -13,7 +14,7 @@ def circle(mult):
         pyautogui.moveRel(mult*1, mult*-1, duration=dur)
         pyautogui.moveRel(mult*1, 0, duration=dur)
         pyautogui.moveRel(mult*1, mult*1, duration=dur)
-        pyautogui.moveReal(0, mult*1,duration=dur)
+        pyautogui.moveRel(0, mult*1,duration=dur)
         pyautogui.moveRel(mult*-1, mult*1,duration=dur)
         pyautogui.moveRel(mult*-1, 0,duration=dur)
         pyautogui.moveRel(mult*-1, mult*-1,duration=dur)
@@ -37,21 +38,51 @@ def hough(img):
         circles = np.round(circles[0, :]).astype("int")
         # loop over the (x, y) coordinates and radius of the circles
         for (x, y, r) in circles:
-            # draw the circle in the output image, then draw a rectangle
-            # corresponding to the center of the circle
-            cv2.circle(img, (x, y), r, (0, 255, 255), 4)
-            cv2.rectangle(img, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
+            dist = distFrom(x, y)
+            
+            if(dist < 20000 and dist > 10000):
+                pyautogui.moveTo(x+50, y+100, duration=0)
+                #drawCirc(x, y, r)
+
+
+def distFrom(x,y):
+    centrex = 455
+    centrey = 400
+    return (((x - centrex)*(x-centrex)) + ((y-centrey)*(y-centrey)))
+            
+def drawCirc(x, y, r):
+    cv2.circle(img, (x, y), r, (0, 255, 255), 4)
+    cv2.rectangle(img, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
             # show the output image
     cv2.imshow("output", img)
-    cv2.waitKey(0)
+    cv2.waitKey(1)
+
+def getScr():
+    img = ImageGrab.grab(bbox=(50, 100,960,900))
+    #910x 800
+    # make image C_CONTIGUOUS to avoid errors that look like:
+    #   File ... in draw_rectangles
+    #   TypeError: an integer is required (got type tuple)
+    # see the discussion here:
+    # https://github.com/opencv/opencv/issues/14866#issuecomment-580207109
+    img = np.ascontiguousarray(img)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    return img
 
 try:
     #pyautogui.moveTo(460, 510, duration=0.25)
     #circle(mult=100) 
-    for i in range(100):
-        img = pyautogui.screenshot(region=(50, 100,960,900))
-        img = np.array(img)
-        hough(img)
-        time.sleep(1)
+    loop_time = time.time()
+    while True:
+        cv2.imshow("out", getScr())
+        print('FPS {}'.format(1 / (time.time() - loop_time)))
+        loop_time = time.time()
+
+        if cv2.waitKey(1) == ord('q'):
+            cv2.destroyAllWindows()
+            break
+        #hough(img)
+        #time.sleep(0.1)
 except KeyboardInterrupt:
     print('done')
