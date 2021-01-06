@@ -23,7 +23,8 @@ On linux with xdotool, for example `xdotool getmouselocation --shell` from a ter
 
 ## How it works
 
-Use `blob.png` for target matching to the food items. A heavily filtered,
+Screengrabs the area with slither.io playing in. Uses [openCV](https://opencv.org/) for image tracking and contour detection and [pyautogui](https://pyautogui.readthedocs.io/en/latest/) for the required mouse input.
+Uses `blob.png` for target matching to the food items. A heavily filtered,
 colour and morphological, image is used for the contour detection of enemys.
 
 ## Visuals
