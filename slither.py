@@ -126,17 +126,21 @@ def getScr():
     # see the discussion here:
     # https://github.com/opencv/opencv/issues/14866#issuecomment-580207109
     img = np.ascontiguousarray(img)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
+    # This makes the colours "normal" but costs ~1 fps
 
     return img
 
 def toGray(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    img_gray = cv2.GaussianBlur(img_gray, (7, 7), 0)
+    #img_gray = cv2.GaussianBlur(img_gray, (7, 7), 0)
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    return gray
+    return img_gray
+
+def toCol(img):
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    return img
 
 def closestPoint(points, sm=100000, cp=200):
 
@@ -151,13 +155,47 @@ def closestPoint(points, sm=100000, cp=200):
             #print(p)
     return clP
 
+def colourThreshold(img):
+    #colour order is blue, green, red
+    #img = cv2.GaussianBlur(img, (7, 7), 0)
+
+    lower_color_bounds = (0, 0, 40)
+    upper_color_bounds = (255,255,130)
+    mask = cv2.inRange(img,lower_color_bounds,upper_color_bounds )
+    return mask 
+
+def findSnakeContours(thresholdedimg, ogimg, midw, midh):
+
+    img = thresholdedimg
+    
+    contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    largecont = []
+    numcont = 0
+    rectarr = []
+    centers = []
+    for c in contours:
+        if( cv2.contourArea(c) > 500):
+            x,y,w,h = cv2.boundingRect(c)
+            cent = (x+w/2,y+h/2)
+            dist = ((cent[0]-midw)**2 + (cent[1]-midh)**2)
+            #print(dist)
+            if dist < 50000 and dist > 2000:
+                largecont.append(c)
+                numcont+=1
+
+                #centers.append((x+((w-x)/2),y+((h-y)/2)))
+                centers.append(cent)
+                #img = cv2.rectangle(ogimg,(x,y),(x+w,y+h),(0,255,0),2)
+    #print(centers)
+    #img = cv2.drawContours(ogimg, largecont, -1, (0,255,0), 3)
+    return img, centers
 
 
 try:
     midwidth = int(getScr().shape[1]/2)
     midheight = int(getScr().shape[0]/2)
-    captEdgeDistX = 19
-    captEdgeDistY = 91
+    captEdgeDistX = 19 #for mouse movements
+    captEdgeDistY = 91 #for mouse movements
     marker_color = (255, 0, 255)
     marker_type = cv2.MARKER_CROSS
     #pyautogui.moveTo(460, 510, duration=0.25)
@@ -169,8 +207,16 @@ try:
 
     while True:
         ogimg = getScr()
-        img, points = find(needle, ogimg,0.65,debug_mode='rectangles')
-        clp = closestPoint(points)
+        img, points = find(needle, (ogimg),0.65,debug_mode='rectangles')
+        clp = closestPoint(points,sm=10000, cp=400)
+
+        contimg, cent = findSnakeContours(colourThreshold(img),ogimg, midwidth,
+                midheight)
+
+        for c in cent:
+            cv2.drawMarker(img, (int(c[0]),int(c[1])), 
+                           color=(0,0,255), markerType=marker_type, 
+                           markerSize=40, thickness=20)
         if (clp != (0, 0)):
             # _pause defaults to true, creates large slowdown
             pyautogui.moveTo(clp[0]+captEdgeDistX, 
@@ -186,13 +232,13 @@ try:
         # centre marker
         cv2.drawMarker(img, (midwidth,
             midheight), color=(55,255,255), markerType=marker_type,
-            markerSize=40, thickness=5)
+            markerSize=40, thickness=1)
         
         print('FPS {}'.format(1 / (time.time() - loop_time)))
         loop_time = time.time()
         cv2.imshow("out", img)
         cv2.moveWindow("out", 950,20)
-       # cv2.imshow("out2", thresh)
+        #cv2.imshow("out2", contimg)
        # cv2.moveWindow("out2", 950,200)
         if cv2.waitKey(1) == ord('q'):
             cv2.destroyAllWindows()
