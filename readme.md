@@ -1,6 +1,6 @@
 # Slither.io bot using openCV
 
-!["Working" GIF](currentprogress.webm)
+!["Working" GIF](currentprogress.gif)
 
 ## Requirements
 
