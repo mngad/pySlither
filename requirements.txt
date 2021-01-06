@@ -1,0 +1,18 @@
+certifi==2020.12.5
+cycler==0.10.0
+imutils @ file:///D:/bld/imutils_1604239000230/work
+kiwisolver @ file:///D:/bld/kiwisolver_1604322452227/work
+matplotlib @ file:///D:/bld/matplotlib-suite_1605180506412/work
+numpy @ file:///D:/bld/numpy_1609881252358/work
+olefile @ file:///home/conda/feedstock_root/build_artifacts/olefile_1602866521163/work
+Pillow @ file:///C:/ci/pillow_1602770972588/work
+PyAutoGUI @ file:///D:/bld/pyautogui_1602591113211/work
+PyMsgBox @ file:///home/conda/feedstock_root/build_artifacts/pymsgbox_1602398310849/work
+pyparsing==2.4.7
+PyScreeze==0.1.26
+python-dateutil==2.8.1
+PyTweening==1.0.3
+scipy @ file:///C:/bld/scipy_1609458016927/work
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1590081179328/work
+tornado @ file:///D:/bld/tornado_1604105353952/work
+wincertstore==0.2

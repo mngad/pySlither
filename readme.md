@@ -4,11 +4,11 @@
 
 ## Requirements
 
-`opencv`, `python3-dev` and `python-tk` via package manager. `pillow`, `numpy`, `imutils`, `pyautogui` via pip. 
+using conda
+conda create -n pySlither python=3.8
+pip install -r requirements.txt
 
-Using openCV version 4.5, python 3.8
-
-## Usage
+## Usage for Linux/Unix
 
 Change the screen grab area in `getScr()` function. I used xdotool (`xdotool getmouselocation --shell`), to "draw" out the shape of the capture window for the slither.io window.
 

@@ -1,1 +1,10 @@
 *.swp
+#ignore notebook checkpoints
+.ipnyb_checkpoints
+
+#VS Code settings
+.vscode
+.vs
+
+#Cache
+__pycache__
