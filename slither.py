@@ -179,7 +179,7 @@ def findSnakeContours(thresholdedimg, ogimg, midw, midh):
             cent = (x+w/2,y+h/2)
             dist = ((cent[0]-midw)**2 + (cent[1]-midh)**2)
             #print(dist)
-            if dist < 50000 and dist > 2000:
+            if dist < 50000 and dist > 3000:
                 largecont.append(c)
                 numcont+=1
 
@@ -191,57 +191,91 @@ def findSnakeContours(thresholdedimg, ogimg, midw, midh):
     return img, centers
 
 
-try:
-    midwidth = int(getScr().shape[1]/2)
-    midheight = int(getScr().shape[0]/2)
-    captEdgeDistX = 19 #for mouse movements
-    captEdgeDistY = 91 #for mouse movements
-    marker_color = (255, 0, 255)
-    marker_type = cv2.MARKER_CROSS
-    #pyautogui.moveTo(460, 510, duration=0.25)
-    #circle(mult=100) 
-    loop_time = time.time()
-    offset=(midheight - 200,midwidth- 200)
-    needle = cv2.imread("blob.png",cv2.IMREAD_UNCHANGED)
+def avoidSnake(centers, midw, midh):
+    
+    curr_closest_dist = 20000
+    curr_closest_center = []
+    for center in centers:
+        dist = ((center[0]-midw)**2 + (center[1]-midh)**2)
+        if dist<curr_closest_dist:
+            curr_closest = dist
+            curr_closest_center = center
+
+    #move_direction
+    if curr_closest_center:
+        diffx = curr_closest_center[0] - midw
+        diffy = curr_closest_center[1] - midh
+        move_direction = (midw - diffx, midh-diffy)
+        return move_direction
+    else: return None
 
 
-    while True:
-        ogimg = getScr()
-        img, points = find(needle, (ogimg),0.65,debug_mode='rectangles')
-        clp = closestPoint(points,sm=10000, cp=400)
-
-        contimg, cent = findSnakeContours(colourThreshold(img),ogimg, midwidth,
-                midheight)
-
-        for c in cent:
-            cv2.drawMarker(img, (int(c[0]),int(c[1])), 
-                           color=(0,0,255), markerType=marker_type, 
-                           markerSize=40, thickness=20)
-        if (clp != (0, 0)):
-            # _pause defaults to true, creates large slowdown
-            pyautogui.moveTo(clp[0]+captEdgeDistX, 
-                             clp[1]+captEdgeDistY, _pause=False)
-
-            cv2.drawMarker(img, (clp[0],clp[1]), 
-                           color=marker_color, markerType=marker_type, 
-                           markerSize=40, thickness=2)
-        else:
-            pyautogui.moveTo(midwidth + captEdgeDistX,
-                             midheight + captEdgeDistY, _pause=False) 
-            # _pause defaults to true, creates large slowdown
-        # centre marker
-        cv2.drawMarker(img, (midwidth,
-            midheight), color=(55,255,255), markerType=marker_type,
-            markerSize=40, thickness=1)
-        
-        print('FPS {}'.format(1 / (time.time() - loop_time)))
+if __name__ == "__main__":
+    try:
+        midwidth = int(getScr().shape[1]/2)
+        midheight = int(getScr().shape[0]/2)
+        captEdgeDistX = 19 #for mouse movements
+        captEdgeDistY = 91 #for mouse movements
+        marker_color = (255, 0, 255)
+        marker_type = cv2.MARKER_CROSS
+        #pyautogui.moveTo(460, 510, duration=0.25)
+        #circle(mult=100) 
         loop_time = time.time()
-        cv2.imshow("out", img)
-        cv2.moveWindow("out", 950,20)
-        #cv2.imshow("out2", contimg)
-       # cv2.moveWindow("out2", 950,200)
-        if cv2.waitKey(1) == ord('q'):
-            cv2.destroyAllWindows()
-            break
-except KeyboardInterrupt:
-    print('done')
+        offset=(midheight - 200,midwidth- 200)
+        needle = cv2.imread("blob.png",cv2.IMREAD_UNCHANGED)
+
+
+        while True:
+            ogimg = getScr()
+            img, points = find(needle, (ogimg),0.65,debug_mode='rectangles')
+            clp = closestPoint(points,sm=10000, cp=400)
+
+            contimg, cent = findSnakeContours(colourThreshold(img),ogimg, midwidth,
+                    midheight)
+
+            for c in cent:
+                cv2.drawMarker(img, (int(c[0]),int(c[1])), 
+                               color=(0,0,255), markerType=marker_type, 
+                               markerSize=40, thickness=20)
+
+            avoid_positions = avoidSnake(cent,midwidth, midheight)
+                
+            print(avoid_positions)
+            if avoid_positions is None:
+
+                if (clp != (0, 0)):
+                    # _pause defaults to true, creates large slowdown
+                    pyautogui.moveTo(clp[0]+captEdgeDistX, 
+                                     clp[1]+captEdgeDistY, _pause=False)
+
+                    cv2.drawMarker(img, (clp[0],clp[1]), 
+                                   color=marker_color, markerType=marker_type, 
+                                   markerSize=40, thickness=2)
+                else:
+                    pyautogui.moveTo(midwidth + captEdgeDistX,
+                                     midheight + captEdgeDistY, _pause=False) 
+                    # _pause defaults to true, creates large slowdown
+
+            else:
+                cv2.drawMarker(img, (int(avoid_positions[0]),int(avoid_positions[1])),
+                                   color=(0,0,100), markerType=marker_type,
+                                   markerSize=40, thickness=20)
+
+                pyautogui.moveTo(avoid_positions[0]+ captEdgeDistX,
+                                 avoid_positions[1] + captEdgeDistY, _pause=False) 
+            # centre marker
+            cv2.drawMarker(img, (midwidth,
+                midheight), color=(55,255,255), markerType=marker_type,
+                markerSize=40, thickness=1)
+            
+            print('FPS {}'.format(1 / (time.time() - loop_time)))
+            loop_time = time.time()
+            cv2.imshow("out", img)
+            cv2.moveWindow("out", 950,20)
+            #cv2.imshow("out2", contimg)
+           # cv2.moveWindow("out2", 950,200)
+            if cv2.waitKey(1) == ord('q'):
+                cv2.destroyAllWindows()
+                break
+    except KeyboardInterrupt:
+        print('done')
