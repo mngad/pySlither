@@ -118,7 +118,7 @@ def find(needle_img, haystack_img, threshold=0.5, debug_mode=None,
     return haystack_img, points
 
 def getScr():
-    img = ImageGrab.grab(bbox=(19, 91,970,1015))
+    img = ImageGrab.grab(bbox=(19, 91,970,900))
     #910x 800
     # make image C_CONTIGUOUS to avoid errors that look like:
     #   File ... in draw_rectangles
@@ -159,41 +159,60 @@ def colourThreshold(img):
     #colour order is blue, green, red
     #img = cv2.GaussianBlur(img, (7, 7), 0)
 
-    lower_color_bounds = (0, 0, 40)
-    upper_color_bounds = (255,255,130)
+    lower_color_bounds = (10, 10, 30)
+    upper_color_bounds = (200,200,200)
     mask = cv2.inRange(img,lower_color_bounds,upper_color_bounds )
     return mask 
 
 def findSnakeContours(thresholdedimg, ogimg, midw, midh):
-
     img = thresholdedimg
+    kernel = np.ones((3,3),np.uint8)
+    img = cv2.dilate(img,kernel, iterations =1)
+    kernel = np.ones((10,10),np.uint8)
+    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
     
-    contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    img = cv2.rectangle(img,(0,0),(midw*2,(midh-1)*2),(0,0,0),20)
+
+    img = cv2.rectangle(img,(700,0),(midw*2,(300-1)),(0,0,0),-1)
+
+    #img = cv2.Canny(toGray(ogimg), threshold, threshold*2)
+    contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE,
+            cv2.CHAIN_APPROX_NONE)
     largecont = []
     numcont = 0
     rectarr = []
     centers = []
     for c in contours:
-        if( cv2.contourArea(c) > 500):
+        if( cv2.contourArea(c) > 3000):
             x,y,w,h = cv2.boundingRect(c)
             cent = (x+w/2,y+h/2)
             dist = ((cent[0]-midw)**2 + (cent[1]-midh)**2)
-            #print(dist)
-            if dist < 50000 and dist > 3000:
-                largecont.append(c)
-                numcont+=1
+            
+            result = cv2.pointPolygonTest(c, (midw,midh), False) 
+            # incredibly cool function to check if the contour we found is us
+            # or not
 
-                #centers.append((x+((w-x)/2),y+((h-y)/2)))
-                centers.append(cent)
-                #img = cv2.rectangle(ogimg,(x,y),(x+w,y+h),(0,255,0),2)
+
+            if(result>=0): continue
+
+
+            #print(dist)
+#            if dist < 70000: 
+            largecont.append(c)
+            numcont+=1
+
+            #centers.append((x+((w-x)/2),y+((h-y)/2)))
+            centers.append(cent)
+            #img = cv2.rectangle(ogimg,(x,y),(x+w,y+h),(0,255,0),2)
     #print(centers)
-    #img = cv2.drawContours(ogimg, largecont, -1, (0,255,0), 3)
+    print(numcont)
+    img = cv2.drawContours(toCol(img), largecont, -1, (200,100,0), 3)
     return img, centers
 
 
 def avoidSnake(centers, midw, midh):
     
-    curr_closest_dist = 20000
+    curr_closest_dist = 50000
     curr_closest_center = []
     for center in centers:
         dist = ((center[0]-midw)**2 + (center[1]-midh)**2)
@@ -212,8 +231,11 @@ def avoidSnake(centers, midw, midh):
 
 if __name__ == "__main__":
     try:
+        width = int(getScr().shape[1])
+        height = int(getScr().shape[0])
         midwidth = int(getScr().shape[1]/2)
-        midheight = int(getScr().shape[0]/2)
+        midheight = int((getScr().shape[0]+115)/2 ) 
+        # 115 to account for cutting the bottom off to remove minimap
         captEdgeDistX = 19 #for mouse movements
         captEdgeDistY = 91 #for mouse movements
         marker_color = (255, 0, 255)
@@ -227,11 +249,11 @@ if __name__ == "__main__":
 
         while True:
             ogimg = getScr()
-            img, points = find(needle, (ogimg),0.65,debug_mode='rectangles')
-            clp = closestPoint(points,sm=10000, cp=400)
-
-            contimg, cent = findSnakeContours(colourThreshold(img),ogimg, midwidth,
+            contimg, cent = findSnakeContours(colourThreshold(ogimg),ogimg, midwidth,
                     midheight)
+            img, points = find(needle, (ogimg),0.65,debug_mode='rectangles')
+            clp = closestPoint(points,sm=20000, cp=400)
+
 
             for c in cent:
                 cv2.drawMarker(img, (int(c[0]),int(c[1])), 
@@ -270,10 +292,12 @@ if __name__ == "__main__":
             
             print('FPS {}'.format(1 / (time.time() - loop_time)))
             loop_time = time.time()
+            img =  cv2.resize(img, (600,500))
             cv2.imshow("out", img)
-            cv2.moveWindow("out", 950,20)
-            #cv2.imshow("out2", contimg)
-           # cv2.moveWindow("out2", 950,200)
+            cv2.moveWindow("out", 980,20)
+            contimg = cv2.resize(contimg, (400,300))
+            cv2.imshow("out2", contimg)
+            cv2.moveWindow("out2", 980,500)
             if cv2.waitKey(1) == ord('q'):
                 cv2.destroyAllWindows()
                 break
