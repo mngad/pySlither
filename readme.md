@@ -13,3 +13,5 @@ Using openCV version 4.5, python 3.8
 Change the screen grab area in `getScr()` function. I used xdotool (`xdotool getmouselocation --shell`), to "draw" out the shape of the capture window for the slither.io window.
 
 Not sure if it works on windows...
+
+`python3 slither.py` to run
