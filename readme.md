@@ -1,6 +1,6 @@
 # Slither.io bot using openCV
 
-!["Working" GIF](currBest.gif)
+!["Working" GIF](currentprogress.webm)
 
 ## Requirements
 
@@ -15,3 +15,19 @@ Change the screen grab area in `getScr()` function. I used xdotool (`xdotool get
 Not sure if it works on windows...
 
 `python3 slither.py` to run
+
+## How it works
+
+Use `blob.png` for target matching to the food items. A heavily filtered,
+colour and morphological, image is used for the contour detection of enemys.
+
+## Visuals
+
+- Green rectangle = food
+- Pink cross = current target food
+- Yellow cross = center / neutral point
+- Red cross = enemy midpoint
+- Orange = escape direction
+
+Viewport 1: General Vision
+Viewport 2: Contour based enemy detection
