@@ -44,8 +44,8 @@ def hough(img):
 
 
 def distFrom(x,y):
-    centrex = 455
-    centrey = 400
+    centrex = 475
+    centrey = 462
     return (((x - centrex)*(x-centrex)) + ((y-centrey)*(y-centrey)))
             
 def drawCirc(x, y, r):
@@ -138,84 +138,62 @@ def toGray(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return gray
 
-def closestPoint(points):
+def closestPoint(points, sm=100000, cp=200):
 
-    smolPoint = 10000
+    smolPoint = sm
     clP = (0,0)
     for point in points:
         #point = np.round(point).astype("int")
         p = distFrom(point[0],point[1])
-        if p < smolPoint and p > 100:
+        if p < smolPoint and p > cp:
             smolPoint = p
             clP = (point[0],point[1])
             #print(p)
     return clP
 
-def findSnek(img):
-    midwidth = int(img.shape[1]/2)
-    midheight = int(img.shape[0]/2)
-    img = img[midwidth-100:midwidth+100, midheight-100:midheight+100]
 
-    imgray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    ret, thresh = cv2.threshold(imgray, 127, 255, 0)
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    #print(contours)
-    return contours, thresh
-
-def avoidSnek(cont):
-    
-    #cont = imutils.grab_contours(cont)
-    viableSneks = []
-    pos = (0, 0)
-    for c in cont:
-
-        M = cv2.moments(c)
-        if M["m00"] != 0:
-            cX = int(M["m10"] / M["m00"])
-            cY = int(M["m01"] / M["m00"])
-            pos = (cX, cY)
-            if(cX < 75 or cX >125):
-                if(cY < 75 or cY >125):
-                
-                    area = cv2.contourArea(c)
-                    if(area > 100):
-                        viableSneks.append(c)
-    return viableSneks
 
 try:
     midwidth = int(getScr().shape[1]/2)
     midheight = int(getScr().shape[0]/2)
+    captEdgeDistX = 19
+    captEdgeDistY = 91
+    marker_color = (255, 0, 255)
+    marker_type = cv2.MARKER_CROSS
     #pyautogui.moveTo(460, 510, duration=0.25)
     #circle(mult=100) 
     loop_time = time.time()
+    offset=(midheight - 200,midwidth- 200)
     needle = cv2.imread("blob.png",cv2.IMREAD_UNCHANGED)
+
+
     while True:
         ogimg = getScr()
-        cont, thresh = findSnek(ogimg)
-        contViable = avoidSnek(cont)
         img, points = find(needle, ogimg,0.65,debug_mode='rectangles')
-        cv2.drawContours(img, contViable, -1, (255,0,0), 3,offset=(midheight - 100,
-            midwidth- 100))
         clp = closestPoint(points)
         if (clp != (0, 0)):
             # _pause defaults to true, creates large slowdown
-            pyautogui.moveTo(clp[0]+19, clp[1]+91, _pause=False)
-            marker_color = (255, 0, 255)
-            marker_type = cv2.MARKER_CROSS
+            pyautogui.moveTo(clp[0]+captEdgeDistX, 
+                             clp[1]+captEdgeDistY, _pause=False)
 
             cv2.drawMarker(img, (clp[0],clp[1]), 
                            color=marker_color, markerType=marker_type, 
                            markerSize=40, thickness=2)
         else:
-            pyautogui.moveTo(midwidth, midheight, _pause=False) 
+            pyautogui.moveTo(midwidth + captEdgeDistX,
+                             midheight + captEdgeDistY, _pause=False) 
             # _pause defaults to true, creates large slowdown
+        # centre marker
+        cv2.drawMarker(img, (midwidth,
+            midheight), color=(55,255,255), markerType=marker_type,
+            markerSize=40, thickness=5)
         
         print('FPS {}'.format(1 / (time.time() - loop_time)))
         loop_time = time.time()
         cv2.imshow("out", img)
         cv2.moveWindow("out", 950,20)
-        cv2.imshow("out2", thresh)
-        cv2.moveWindow("out2", 950,200)
+       # cv2.imshow("out2", thresh)
+       # cv2.moveWindow("out2", 950,200)
         if cv2.waitKey(1) == ord('q'):
             cv2.destroyAllWindows()
             break
