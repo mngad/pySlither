@@ -10,7 +10,8 @@ Using openCV version 4.5, python 3.8
 
 ## Usage
 
-Change the screen grab area in `getScr()` function. I used xdotool (`xdotool getmouselocation --shell`), to "draw" out the shape of the capture window for the slither.io window.
+Edit the `capture_size.conf` file to set the bounds of the slither.io window.
+The lower boundary should avoid inclusing the minimap in the bottom right.
 
 Not sure if it works on windows...
 
@@ -30,4 +31,13 @@ colour and morphological, image is used for the contour detection of enemys.
 - Orange = escape direction
 
 Viewport 1: General Vision
+
+
+
+
+
+
+
+
+
 Viewport 2: Contour based enemy detection

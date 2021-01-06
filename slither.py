@@ -122,7 +122,12 @@ def find(needle_img, haystack_img, threshold=0.5, debug_mode=None,
 
 
 def getScr():
-    img = ImageGrab.grab(bbox=(19, 91, 970, 900))
+    f = open("capture_size.conf","r")
+    bbox = f.readline()
+    f.close()
+    bbox = tuple(map(int, bbox.split(', '))) 
+    #print(bbox)
+    img = ImageGrab.grab(bbox=bbox)
     # 910x 800
     # make image C_CONTIGUOUS to avoid errors that look like:
     #   File ... in draw_rectangles
@@ -220,7 +225,7 @@ def findSnakeContours(thresholdedimg, ogimg, midw, midh):
 
 def avoidSnake(centers, midw, midh):
 
-    curr_closest_dist = 50000
+    curr_closest_dist = 80000
     curr_closest_center = []
     for center in centers:
         dist = ((center[0]-midw)**2 + (center[1]-midh)**2)
@@ -240,13 +245,19 @@ def avoidSnake(centers, midw, midh):
 
 if __name__ == "__main__":
     try:
+
+        f = open("capture_size.conf","r")
+        bbox = f.readline()
+        f.close()
+        bbox = tuple(map(int, bbox.split(', ')))
+
         width = int(getScr().shape[1])
         height = int(getScr().shape[0])
         midwidth = int(getScr().shape[1]/2)
         midheight = int((getScr().shape[0]+115)/2)
         # 115 to account for cutting the bottom off to remove minimap
-        captEdgeDistX = 19  # for mouse movements
-        captEdgeDistY = 91  # for mouse movements
+        captEdgeDistX = bbox[0]  # for mouse movements
+        captEdgeDistY = bbox[1]  # for mouse movements
         marker_color = (255, 0, 255)
         marker_type = cv2.MARKER_CROSS
         #pyautogui.moveTo(460, 510, duration=0.25)
@@ -260,7 +271,7 @@ if __name__ == "__main__":
             contimg, cent = findSnakeContours(colourThreshold(ogimg), ogimg, midwidth,
                                               midheight)
             img, points = find(needle, (ogimg), 0.65, debug_mode='rectangles')
-            clp = closestPoint(points, sm=20000, cp=400)
+            clp = closestPoint(points, sm=50000, cp=400)
 
             for c in cent:
                 cv2.drawMarker(img, (int(c[0]), int(c[1])),
@@ -287,7 +298,7 @@ if __name__ == "__main__":
 
             else:
                 cv2.drawMarker(img, (int(avoid_positions[0]), int(avoid_positions[1])),
-                               color=(0, 69, 255), markerType=marker_type,
+                               color=(0, 100, 255), markerType=marker_type,
                                markerSize=40, thickness=20)
 
                 pyautogui.moveTo(avoid_positions[0] + captEdgeDistX,
