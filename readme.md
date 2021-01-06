@@ -19,8 +19,6 @@ Options for finding these values on windows: [Stackoverflow](https://superuser.c
 
 On linux with xdotool, for example `xdotool getmouselocation --shell` from a terminal emulator with the mouse positioned at the corners of the slither.io window.
 
-Not sure if it works on windows...
-
 `python3 slither.py` to run
 
 ## How it works
