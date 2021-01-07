@@ -5,8 +5,9 @@ import helper as hlp
 
 
 class FoodDetection:
-    def __init__(self, needle_img_ar, haystack_img, midw, midh):
-        """Class for all of the food detection and nearest food identification.
+    def __init__(self, needle_img_ar: np.ndarray, haystack_img: np.ndarray, midw: int, midh: int):
+        """
+        Class for all of the food detection and nearest food identification.
         Takes an list of needles to be identified and the haystack image to
         find the needle in.
 
@@ -21,8 +22,9 @@ class FoodDetection:
         self.midw = midw
         self.midh = midh
 
-    def dist_from(self, x, y):
-        """Finds the distance from the point x, y to the center, returns the
+    def dist_from(self, x: int, y: int):
+        """
+        Finds the distance from the point x, y to the center, returns the
         distance/ hypotenuse
             
             x (int): x position
@@ -34,7 +36,8 @@ class FoodDetection:
 
 
     def find(self, threshold=0.5, debug_mode=None,method=cv2.TM_CCOEFF_NORMED):
-        """Finds the food. Takes a theshhold, sensible value above 0.5, below
+        """
+        Finds the food. Takes a theshhold, sensible value above 0.5, below
         0.2 causes it to hang. Debug mode gives choice of rectangle or point
         for food identification. Method can be changed, but TM_CCOEFF_NORMED
         was the most reliable. Updates points list of food, and haystack image
@@ -112,7 +115,8 @@ class FoodDetection:
 
 
     def get_closest_point(self, sm=100000, cp=200):
-        """Finds the closest item of food. Takes the point list from find(), sm
+        """
+        Finds the closest item of food. Takes the point list from find(), sm
         is the initial furthest it should look and cp is the closest it should
         search. Sets self.closest_points for mouse movement in main().
         
