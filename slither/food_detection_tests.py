@@ -24,7 +24,7 @@ class FoodDetection:
 '''
 A test:
 
-def dist_from_not_negative():
+def test_dist_from_not_negative():
     instance_of_class = FoodDetection(needle_img, haystack_img)
     distance_from = instance_of_class.dist_from( x, y )
 
