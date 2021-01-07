@@ -87,8 +87,8 @@ if __name__ == "__main__":
             print('FPS {}'.format(1 / (time.time() - loop_time)))
             loop_time = time.time()
 
-            hlp.output_img(img, (980, 0), (600, 500))
-            hlp.output_img(contimg, (980, 600), (400, 300))
+            hlp.output_img("norm", img, (980, 0), (600, 500))
+            hlp.output_img("cont",contimg, (980, 600), (400, 300))
 
             if cv2.waitKey(1) == ord('q'):
                 cv2.destroyAllWindows()
