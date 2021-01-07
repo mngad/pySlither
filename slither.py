@@ -271,7 +271,7 @@ if __name__ == "__main__":
             contimg, cent = findSnakeContours(colourThreshold(ogimg), ogimg, midwidth,
                                               midheight)
             img, points = find(needle, (ogimg), 0.65, debug_mode='rectangles')
-            clp = closestPoint(points, sm=50000, cp=400)
+            clp = closestPoint(points, sm=90000, cp=400)
 
             for c in cent:
                 cv2.drawMarker(img, (int(c[0]), int(c[1])),
