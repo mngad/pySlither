@@ -8,7 +8,14 @@ class FoodDetection:
     def __init__(self, needle_img_ar, haystack_img, midw, midh):
         """Class for all of the food detection and nearest food identification.
         Takes an list of needles to be identified and the haystack image to
-        find the needle in."""
+        find the needle in.
+
+        Parameters:
+            midw (int): mid width
+            midh (int): mid height
+            needle_img_ar ([numpy.ndarray]): list of the needles
+            haystack_img (numpy.ndarray): the haystack or normal img
+        """
         self.needle_img_ar = needle_img_ar
         self.haystack_img = haystack_img
         self.midw = midw
@@ -16,7 +23,12 @@ class FoodDetection:
 
     def dist_from(self, x, y):
         """Finds the distance from the point x, y to the center, returns the
-        distance/ hypotenuse"""
+        distance/ hypotenuse
+            
+            x (int): x position
+            y (int): y position
+
+        """
         return ((x - self.midw)**2 + ((y-self.midh)**2))
 
 
@@ -26,7 +38,13 @@ class FoodDetection:
         0.2 causes it to hang. Debug mode gives choice of rectangle or point
         for food identification. Method can be changed, but TM_CCOEFF_NORMED
         was the most reliable. Updates points list of food, and haystack image
-        for vis."""
+        for vis.
+
+        Parameters:
+            threshold (float): threshold for matching
+            debug_mode (str): None, rectangle or point for type of drawing
+            method (cv2 / (int)): method used for matching
+        """
 
         points = []
         haystack_img = self.haystack_img
@@ -96,7 +114,12 @@ class FoodDetection:
     def get_closest_point(self, sm=100000, cp=200):
         """Finds the closest item of food. Takes the point list from find(), sm
         is the initial furthest it should look and cp is the closest it should
-        search. Sets self.closest_points for mouse movement in main()."""
+        search. Sets self.closest_points for mouse movement in main().
+        
+        sm (int)
+        cp (int)
+
+        """
 
         cl_p = (0, 0)
         for point in self.points:
