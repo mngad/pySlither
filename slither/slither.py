@@ -24,7 +24,11 @@ if __name__ == "__main__":
         marker_color = (255, 0, 255)
         marker_type = cv2.MARKER_CROSS
         loop_time = time.time()
-        needle = cv2.imread("../blob.png", cv2.IMREAD_UNCHANGED)
+
+        # an array of the possible template matches, tanks performance when
+        # more than on is used and also increases changes of false positives
+        needle = [cv2.imread("../blob.png", cv2.IMREAD_UNCHANGED)]
+                #cv2.imread("../big_blob.png", cv2.IMREAD_UNCHANGED)]
 
         while True:
             ogimg = ScreenGrab()
@@ -43,7 +47,7 @@ if __name__ == "__main__":
             img, contimg = opponent.draw_enemy_pos()
             opponent.avoid_snake()
             avoid_positions = opponent.move_direction
-            test = True
+            test = False
             if avoid_positions is None and test == False:
 
                 if (clp != (0, 0)):
