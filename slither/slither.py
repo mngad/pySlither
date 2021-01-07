@@ -37,16 +37,13 @@ if __name__ == "__main__":
                                 midheight,
                                 ogimg.img,
                                 ogimg.colour_threshold())
-            food = FoodDetection(needle, ogimg.img, midwidth, midheight)
 
             p1 = Process(target=opponent.findSnakeContours)
             p1.start()
+            #p1.join()
 
-          #  p2 = Process(target=food.find(threshold=0.65,
-          #      debug_mode='rectangles'))
-          #  p2.start()
-            p1.join()
-          #  p2.join()
+            food = FoodDetection(needle, ogimg.img, midwidth, midheight)
+            food.find(threshold=0.65, debug_mode='rectangles')
             food.get_closest_point(sm=90000, cp=400)
             img = food.food_vis_img
             clp = food.closest_points
@@ -82,7 +79,7 @@ if __name__ == "__main__":
                 if test == False:
                     cv2.drawMarker(img,
                                    (int(avoid_positions[0]),
-                                    int(avoid_positions[1])),
+                                   int(avoid_positions[1])),
                                    color=(0, 100, 255),
                                    markerType=marker_type,
                                    markerSize=40,
