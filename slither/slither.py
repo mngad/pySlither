@@ -8,6 +8,7 @@ from screengrab import ScreenGrab
 from opponent_detection import Opponent
 from food_detection import FoodDetection
 import helper as hlp
+from multiprocessing import Process
 
 
 if __name__ == "__main__":
@@ -36,10 +37,16 @@ if __name__ == "__main__":
                                 midheight,
                                 ogimg.img,
                                 ogimg.colour_threshold())
-            opponent.findSnakeContours()
-
             food = FoodDetection(needle, ogimg.img, midwidth, midheight)
-            food.find(threshold=0.65, debug_mode='rectangles')
+
+            p1 = Process(target=opponent.findSnakeContours)
+            p1.start()
+
+          #  p2 = Process(target=food.find(threshold=0.65,
+          #      debug_mode='rectangles'))
+          #  p2.start()
+            p1.join()
+          #  p2.join()
             food.get_closest_point(sm=90000, cp=400)
             img = food.food_vis_img
             clp = food.closest_points
