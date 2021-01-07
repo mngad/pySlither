@@ -44,8 +44,11 @@ if __name__ == "__main__":
             img = food.food_vis_img
             clp = food.closest_points
             
-            img, contimg = opponent.draw_enemy_pos()
-            opponent.avoid_snake()
+            # opponent.draw and opponent.avoid have two varients for point or
+            # center of enemy detection, point is more accurate but costs 2 to
+            # 4 fps
+            img, contimg = opponent.draw_enemy_pos(mode="point")
+            opponent.avoid_snake(mode="point")
             avoid_positions = opponent.move_direction
             test = False
             if avoid_positions is None and test == False:

@@ -37,8 +37,8 @@ class Opponent:
         # covers the minimap
 
         #img = cv2.Canny(toGray(ogimg), threshold, threshold*2)
-        contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE,
-                                               cv2.CHAIN_APPROX_NONE)
+        contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL,
+                                               cv2.CHAIN_APPROX_SIMPLE)
         largecont = []
         numcont = 0
         rectarr = []
@@ -65,38 +65,81 @@ class Opponent:
 
         self.contoured_image = img
         self.centers = centers
+        self.contour_points = largecont
 
 
-    def avoid_snake(self):
-        centers = self.centers
-        curr_closest_dist = 80000
-        curr_closest_center = []
-        for center in centers:
-            dist = ((center[0]-self.midw)**2 + (center[1]-self.midh)**2)
-            if dist < curr_closest_dist:
-                curr_closest = dist
-                curr_closest_center = center
+    def avoid_snake(self, mode='point'):
 
-        # move_direction
-        if curr_closest_center:
-            diffx = curr_closest_center[0] - self.midw
-            diffy = curr_closest_center[1] - self.midh
-            move_direction = (self.midw - diffx, self.midh-diffy)
-            self.move_direction = move_direction
-        else:
-            self.move_direction = None
+        if mode == 'center':
+            centers = self.centers
+            curr_closest_dist = 80000
+            curr_closest_center = []
+            for center in centers:
+                dist = ((center[0]-self.midw)**2 + (center[1]-self.midh)**2)
+                if dist < curr_closest_dist:
+                    curr_closest = dist
+                    curr_closest_center = center
 
-    def draw_enemy_pos(self):
+            # move_direction
+            if curr_closest_center:
+                diffx = curr_closest_center[0] - self.midw
+                diffy = curr_closest_center[1] - self.midh
+                move_direction = (self.midw - diffx, self.midh-diffy)
+                self.move_direction = move_direction
+            else:
+                self.move_direction = None
+        if mode == 'point':
+            curr_closest_dist = 80000
+            curr_closest_center = []
+            for cc in self.contour_points:
+                for c in cc:
 
-        if self.centers:
-            for c in self.centers:
-                contimg = cv2.drawMarker(self.contoured_image, (int(c[0]), int(c[1])),
-                           color=(0, 0, 255), markerType=self.marker_type,
-                           markerSize=40, thickness=20)
-                normimg = cv2.drawMarker(self.img, (int(c[0]), int(c[1])),
-                           color=(0, 0, 255), markerType=self.marker_type,
-                           markerSize=40, thickness=20)
-            return normimg, contimg
-        else: return self.img, self.contoured_image
+                    dist = ((c[0][0]-self.midw)**2 + (c[0][1]-self.midh)**2)
+                    if dist < curr_closest_dist:
+                        curr_closest = dist
+                        curr_closest_center = c[0]
+
+            # move_direction
+            try:
+                diffx = curr_closest_center[0] - self.midw
+                diffy = curr_closest_center[1] - self.midh
+                move_direction = (self.midw - diffx, self.midh-diffy)
+                self.move_direction = move_direction
+            except:
+                self.move_direction = None
+
+    
+
+    def draw_enemy_pos(self, mode='point'):
+
+        if mode == 'center':
+
+            if self.centers:
+                for c in self.centers:
+                    contimg = cv2.drawMarker(self.contoured_image, (int(c[0]), int(c[1])),
+                               color=(0, 0, 255), markerType=self.marker_type,
+                               markerSize=40, thickness=20)
+                    normimg = cv2.drawMarker(self.img, (int(c[0]), int(c[1])),
+                               color=(0, 0, 255), markerType=self.marker_type,
+                               markerSize=40, thickness=20)
+                return normimg, contimg
+            else: return self.img, self.contoured_image
+
+        if mode == 'point':
+
+            if self.contour_points:
+                for cc in self.contour_points:
+                    for c in cc:
+
+                        #print(c[0])
+                        contimg = cv2.drawMarker(self.contoured_image,
+                                (int(c[0][0]), int(c[0][1])),
+                                   color=(0, 0, 255), markerType=self.marker_type,
+                                   markerSize=40, thickness=20)
+                        normimg = cv2.drawMarker(self.img, (int(c[0][0]), int(c[0][1])),
+                                   color=(0, 0, 255), markerType=self.marker_type,
+                                   markerSize=40, thickness=20)
+                return normimg, contimg
+            else: return self.img, self.contoured_image
 
 
