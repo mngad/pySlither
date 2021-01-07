@@ -45,8 +45,12 @@ class ScreenGrab:
     def colour_threshold(self):
         # colour order is blue, green, red
         #img = cv2.GaussianBlur(img, (7, 7), 0)
-        lower_color_bounds = (10, 10, 30)
-        upper_color_bounds = (200, 200, 200)
+        lower_color_bounds = (10, 10, 40)
+        upper_color_bounds = (230, 230, 230)
         mask = cv2.inRange(self.img, lower_color_bounds, upper_color_bounds)
-        return mask
+        lower_color_bounds2 = (0, 0, 120)
+        upper_color_bounds2 = (50, 100, 255)
+        mask2 = cv2.inRange(self.img, lower_color_bounds2, upper_color_bounds2)
+        maskf = cv2.addWeighted(mask, 1, mask2, 1, 0)
+        return maskf
 

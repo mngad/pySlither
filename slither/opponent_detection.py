@@ -20,6 +20,7 @@ class Opponent:
         img = cv2.dilate(img, kernel, iterations=1)
         kernel = np.ones((10, 10), np.uint8)
         img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+        img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
 
         img = cv2.rectangle(img, (0, 0), (self.midw*2, (self.midh-1)*2), (0, 0, 0), 20)
         # surrounding black box to help with contour detection of partial
