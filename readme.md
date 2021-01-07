@@ -12,7 +12,7 @@ Using openCV version 4.5, python 3.8
 
 Edit the `capture_size.conf` file to set the bounds of the slither.io window.
 
-For example `19, 91, 970, 1015`, where `19, 91` is the upper left value and `970, 900` is the bottom right value.
+For example `19, 91, 970, 1015`, where `19, 91` is the upper left value and `970, 1015` is the bottom right value. Performance can be improved by reducing the area, but at the cost of enemy snake avoidance. Ensure that the yellow center marker is in the middle of the player snake head, else the contour detection will detect the player snake as an enemy.
 
 Options for finding these values on windows: [Stackoverflow](https://superuser.com/questions/85822/utilities-for-finding-x-y-screen-coordinates) or [Point Position](https://www.snapfiles.com/get/pointpos.html) or trial and error...
 
