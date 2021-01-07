@@ -5,6 +5,15 @@ import helper as hlp
 
 class Opponent:
     def __init__(self, midw, midh, img, thresh_img):
+        """Class for the detection of enemy snakes. Sets middle of image, the
+        image itself and the thresholded image on init
+
+        Parameters:
+            midw (int): mid width
+            midh (int): mid height
+            img (numpy.ndarray): the image
+            thresh_img (numpy.ndarray): thresholded image
+        """
         self.midw = midw
         self.midh = midh
         self.img = img
@@ -14,6 +23,11 @@ class Opponent:
 
 
     def findSnakeContours(self):
+        """Finds the enemy snake contours from the thresholded image. Takes the
+        thresholded image, performs dilate, open and close morpho filters.
+        Draws the contours, sets the contour points and rect centers
+
+        """
         img = self.thresh_img
 
         kernel = np.ones((3, 3), np.uint8)
@@ -41,7 +55,6 @@ class Opponent:
                                                cv2.CHAIN_APPROX_SIMPLE)
         largecont = []
         numcont = 0
-        rectarr = []
         centers = []
         for c in contours:
             if(cv2.contourArea(c) > 3000):
@@ -69,6 +82,20 @@ class Opponent:
 
 
     def avoid_snake(self, mode='point'):
+        """
+        Function to decide the nearest enemy and the "escape vectore"
+        
+        Parameters:
+            mode (str): either 'point' or 'center', which decides the type of
+            snake avoidance - center of enemy or edge - point is better but
+            with a performance hit.
+
+        Returns:
+            self.move_direction (tuple): sets the escape dir
+
+        """
+
+        
 
         if mode == 'center':
             centers = self.centers
@@ -86,8 +113,10 @@ class Opponent:
                 diffy = curr_closest_center[1] - self.midh
                 move_direction = (self.midw - diffx, self.midh-diffy)
                 self.move_direction = move_direction
+
             else:
                 self.move_direction = None
+
         if mode == 'point':
             curr_closest_dist = 80000
             curr_closest_center = []
@@ -111,7 +140,23 @@ class Opponent:
     
 
     def draw_enemy_pos(self, mode='point'):
+        """Draws the enemy position
 
+        Parameters:
+            mode (str): either 'point' or 'center', which decides the type of
+            snake avoidance - center of enemy or edge - point is better but
+            with a performance hit.
+
+        Returns:
+            normimg (numpy.ndarray): the normal image with enemies drawn on
+            contimg (numpy.ndarray): the contour image with enemies drawn on
+
+            or
+
+            self.img (numpy.ndarray): the normal image
+            self.contoured_image (numpy.ndarray): the contour image
+
+        """
         if mode == 'center':
 
             if self.centers:
