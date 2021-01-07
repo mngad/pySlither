@@ -11,9 +11,8 @@ Using openCV version 4.5, python 3.8
 ## Usage
 
 Edit the `capture_size.conf` file to set the bounds of the slither.io window.
-The lower boundary should avoid inclusing the minimap in the bottom right.
 
-For example `19, 91, 970, 900`, where `19, 91` is the upper left value and `970, 900` is the bottom right value.
+For example `19, 91, 970, 1015`, where `19, 91` is the upper left value and `970, 900` is the bottom right value.
 
 Options for finding these values on windows: [Stackoverflow](https://superuser.com/questions/85822/utilities-for-finding-x-y-screen-coordinates) or [Point Position](https://www.snapfiles.com/get/pointpos.html) or trial and error...
 
