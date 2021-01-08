@@ -41,15 +41,17 @@ if __name__ == "__main__":
             opponent.findSnakeContours()
 
             food = FoodDetection(needle, ogimg.img, midwidth, midheight)
+
             food.find(threshold=0.65, debug_mode='rectangles')
+
             food.get_closest_point(sm=90000, cp=400)
             img = food.food_vis_img
             clp = food.closest_points
-            
+            img2 = img
             # opponent.draw and opponent.avoid have two varients for point or
             # center of enemy detection, point is more accurate but costs 2 to
             # 4 fps
-            img, contimg = opponent.draw_enemy_pos(mode='point')
+            img2, contimg = opponent.draw_enemy_pos(mode='point')
             opponent.avoid_snake(mode='point')
             avoid_positions = opponent.move_direction
             test = False

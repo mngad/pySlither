@@ -24,12 +24,13 @@ class FoodDetection:
         self.midw = midw
         self.midh = midh
         self.points = []
+        self.food_vis_img = None
 
     def dist_from(self, x: int, y: int):
         """
         Finds the distance from the point x, y to the center, returns the
         distance/ hypotenuse
-            
+
             x (int): x position
             y (int): y position
 
@@ -37,13 +38,14 @@ class FoodDetection:
         return ((x - self.midw)**2 + ((y-self.midh)**2))
 
 
-    def find_para(self, needle_img, points, threshold, debug_mode,method=cv2.TM_CCOEFF_NORMED):
-        haystack_img = self.haystack_img
+    def find_para(self, needle_img, haystack_img, points, threshold, debug_mode,method=cv2.TM_CCOEFF_NORMED):
+
+
         count = 0
         needle_w = needle_img.shape[1]
         needle_h = needle_img.shape[0]
         # run the OpenCV algorithm
-        result = cv2.matchTemplate(self.haystack_img, needle_img, method)
+        result = cv2.matchTemplate(haystack_img, needle_img, method)
 
         # Get the all the positions from the match result that exceed our threshold
         locations = np.where(result >= threshold)
@@ -86,7 +88,7 @@ class FoodDetection:
                     # Determine the box position
                     top_left = (x, y)
                     bottom_right = (x + w, y + h)
-                    haystack_img = cv2.rectangle(haystack_img, 
+                    haystack_img = cv2.rectangle(haystack_img,
                             top_left, bottom_right, color=line_color,
                                   lineType=line_type, thickness=2)
                 elif debug_mode == 'points':
@@ -95,7 +97,9 @@ class FoodDetection:
                                    markerSize=40, thickness=2)
 
         count += 1
-        self.points.append(points)
+        #print(type(self.drawn_haystack[0]))
+
+        return points, haystack_img
 
     def find(self, threshold=0.5, debug_mode=None,method=cv2.TM_CCOEFF_NORMED):
         """
@@ -116,12 +120,33 @@ class FoodDetection:
 
         num_cores = multiprocessing.cpu_count()
         pool = multiprocessing.Pool(num_cores)
-        points = [pool.apply(self.find_para, args=(needle_img,
+        results = pool.starmap(self.find_para,[(needle_img,
+            haystack_img,
             points,
-            threshold, 'rectangles')) for needle_img in self.needle_img_ar]
+            threshold,
+            'rectangles') for needle_img in self.needle_img_ar])
         pool.close()
+        points = [result[0] for result in results]
+        haystacks = [result[1] for result in results]
+
+        #print(type(haystacks[0]))
+        #print(self.points)
         self.points = points
+        #print(self.points)
+        #print(type(self.food_vis_img))
+        #self.food_vis_img = haystacks[0]
+        #print(type(self.food_vis_img))
+        for hay in haystacks:
+            haystack_img = cv2.addWeighted(haystack_img, 0.5, hay,1,0)
+
         self.food_vis_img = haystack_img
+        # self.food_vis_img = [haystack_img = cv2.addWeighted(haystack_img,
+        #                                  1,
+        #                                  hay,
+        #                                  1,
+        #                                  0) for hay in haystacks]
+        #print(type(self.food_vis_img))
+
 
 
 
@@ -131,24 +156,23 @@ class FoodDetection:
         Finds the closest item of food. Takes the point list from find(), sm
         is the initial furthest it should look and cp is the closest it should
         search. Sets self.closest_points for mouse movement in main().
-        
+
         sm (int)
         cp (int)
 
         """
 
         cl_p = (0, 0)
-        try:
-            for p in self.points:
-                for point in p:
-                    #point = np.round(point).astype("int")
-                    p = self.dist_from(point[0], point[1])
-                    if p < sm and p > cp:
-                        sm = p
-                        cl_p = (point[0], point[1])
-                        # print(p)
-            self.closest_points = cl_p
-        except Exception:
-            self.closest_points = cl_p
-            
+        #print(self.points)
 
+        for points in self.points:
+            #print(p)
+            for point in points:
+                #print(point)
+                #point = np.round(point).astype("int")
+                p = self.dist_from(point[0], point[1])
+                if p < sm and p > cp:
+                    sm = p
+                    cl_p = (point[0], point[1])
+                    #print(p)
+        self.closest_points = cl_p
