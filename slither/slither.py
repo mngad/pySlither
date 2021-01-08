@@ -71,19 +71,18 @@ if __name__ == "__main__":
                                      _pause=False)
                     # _pause defaults to true, creates large slowdown
 
-            else: 
-                if test == False:
-                    cv2.drawMarker(img,
-                                   (int(avoid_positions[0]),
-                                    int(avoid_positions[1])),
-                                   color=(0, 100, 255),
-                                   markerType=marker_type,
-                                   markerSize=40,
-                                   thickness=20)
+            elif test == False:
+                cv2.drawMarker(img,
+                               (int(avoid_positions[0]),
+                                int(avoid_positions[1])),
+                               color=(0, 100, 255),
+                               markerType=marker_type,
+                               markerSize=40,
+                               thickness=20)
 
-                    pyautogui.moveTo(avoid_positions[0] + captEdgeDistX,
-                                     avoid_positions[1] + captEdgeDistY,
-                                     _pause=False)
+                pyautogui.moveTo(avoid_positions[0] + captEdgeDistX,
+                                 avoid_positions[1] + captEdgeDistY,
+                                 _pause=False)
             # centre marker
             cv2.drawMarker(img,
                            (midwidth, midheight),
