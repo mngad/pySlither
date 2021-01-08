@@ -28,8 +28,8 @@ if __name__ == "__main__":
 
         # an array of the possible template matches, tanks performance when
         # more than on is used and also increases changes of false positives
-        needle = [cv2.imread("../blob.png", cv2.IMREAD_UNCHANGED)]
-                #cv2.imread("../big_blob.png", cv2.IMREAD_UNCHANGED)]
+        needle = [cv2.imread("../blob.png", cv2.IMREAD_UNCHANGED),
+                cv2.imread("../big_blob.png", cv2.IMREAD_UNCHANGED)]
 
         while True:
             ogimg = ScreenGrab()
@@ -38,9 +38,7 @@ if __name__ == "__main__":
                                 ogimg.img,
                                 ogimg.colour_threshold())
 
-            p1 = Process(target=opponent.findSnakeContours)
-            p1.start()
-            #p1.join()
+            opponent.findSnakeContours()
 
             food = FoodDetection(needle, ogimg.img, midwidth, midheight)
             food.find(threshold=0.65, debug_mode='rectangles')
