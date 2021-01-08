@@ -38,7 +38,7 @@ class FoodDetection:
         return ((x - self.midw)**2 + ((y-self.midh)**2))
 
 
-    def find_para(self, needle_img, haystack_img, points, threshold, debug_mode,method=cv2.TM_CCOEFF_NORMED):
+    def find_para(self, i, needle_img, haystack_img, points, threshold, debug_mode,method=cv2.TM_CCOEFF_NORMED):
 
 
         count = 0
@@ -99,7 +99,7 @@ class FoodDetection:
         count += 1
         #print(type(self.drawn_haystack[0]))
 
-        return points, haystack_img
+        return (i, points, haystack_img)
 
     def find(self, threshold=0.5, debug_mode=None,method=cv2.TM_CCOEFF_NORMED):
         """
@@ -119,33 +119,23 @@ class FoodDetection:
         haystack_img = self.haystack_img
 
         num_cores = multiprocessing.cpu_count()
-        pool = multiprocessing.Pool(num_cores)
-        results = pool.starmap(self.find_para,[(needle_img,
+        pool = multiprocessing.Pool(12)
+        results = pool.starmap_async(self.find_para,[(i, needle_img,
             haystack_img,
             points,
             threshold,
-            'rectangles') for needle_img in self.needle_img_ar])
+            'rectangles') for i, needle_img in enumerate(self.needle_img_ar)]).get()
         pool.close()
-        points = [result[0] for result in results]
-        haystacks = [result[1] for result in results]
+        pool.join()
+        points = [result[1] for result in results]
+        haystacks = [result[2] for result in results]
 
-        #print(type(haystacks[0]))
-        #print(self.points)
-        self.points = points
-        #print(self.points)
-        #print(type(self.food_vis_img))
-        #self.food_vis_img = haystacks[0]
-        #print(type(self.food_vis_img))
+        #print(points)
+        #print(haystacks)
         for hay in haystacks:
             haystack_img = cv2.addWeighted(haystack_img, 0.5, hay,1,0)
 
         self.food_vis_img = haystack_img
-        # self.food_vis_img = [haystack_img = cv2.addWeighted(haystack_img,
-        #                                  1,
-        #                                  hay,
-        #                                  1,
-        #                                  0) for hay in haystacks]
-        #print(type(self.food_vis_img))
 
 
 
