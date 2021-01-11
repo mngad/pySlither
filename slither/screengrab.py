@@ -2,30 +2,25 @@ from PIL import ImageGrab
 import cv2
 import numpy as np
 
+
 class ScreenGrab:
-    def __init__(self):
+    def __init__(self, bbox=None):
         """Class contains the grabbing the image and most of the image
         manipulation. Calls self.extent() and self.get_scr() on init"""
 
-        self.extent = self.open_conf()
-        self.img = self.get_scr() 
-        
-    def open_conf(self):
-        """Opens the config file to read the capture dimensions. Returns
-        a tuple containing the four corners of the capture area"""
+        self.extent = bbox
+        self.img = None
 
-        f = open("../capture_size.conf","r")
-        bbox = f.readline()
-        f.close()
-        bbox = tuple(map(int, bbox.split(', ')))
-        return (bbox)
+
+
+
 
     def get_scr(self):
         """Grabs the image based on the extent function. Returns the image as
         an RGB (cv2 defaults to BGR)"""
 
         img = ImageGrab.grab(bbox=self.extent)
-        
+
         # make image C_CONTIGUOUS to avoid errors that look like:
         #   TypeError: an integer is required (got type tuple)
         # see the discussion here:
@@ -33,7 +28,7 @@ class ScreenGrab:
         img = np.ascontiguousarray(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # This makes the colours "normal" but costs ~1 fps
-
+        self.img = img
         return img
 
 
@@ -69,4 +64,3 @@ class ScreenGrab:
         mask2 = cv2.inRange(self.img, lower_color_bounds2, upper_color_bounds2)
         maskf = cv2.addWeighted(mask, 1, mask2, 1, 0)
         return maskf
-
