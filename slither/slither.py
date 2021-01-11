@@ -43,7 +43,7 @@ if __name__ == "__main__":
             food.get_closest_point(sm=90000, cp=400)
             img = food.food_vis_img
             clp = food.closest_points
-            
+
             # opponent.draw and opponent.avoid have two varients for point or
             # center of enemy detection, point is more accurate but costs 2 to
             # 4 fps
