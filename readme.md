@@ -4,12 +4,18 @@
 
 ## Requirements
 
-`opencv`, `python3-dev` and `python-tk` via package manager. `pillow`, `numpy`, `imutils`, `pyautogui` via pip. 
+`opencv`, `python3-dev` and `python-tk` via package manager. `pillow`, `numpy`, `imutils`, `pyautogui` via pip.
 
 Using openCV version 4.5, python 3.8
 
 ## Usage
 _IMPORTANT_ slither.io must be in low quality mode (top right of the screen), due to changes in the contrast, brightness and colour values.
+
+### Automatically find capture windows
+
+Run `python3 slither.py -c` to define the capture area based on mouse positions. Move the mouse to top left by the end of the first countdown and bottom right by the end of the second countdown. Values are saved to `capture_size.conf`. When `python slither.py` it reads from `capture_size.conf`.
+
+### Manually find capture windows
 
 Edit the `capture_size.conf` file to set the bounds of the slither.io window.
 
@@ -19,7 +25,9 @@ Options for finding these values on windows: [Stackoverflow](https://superuser.c
 
 On linux with xdotool, for example `xdotool getmouselocation --shell` from a terminal emulator with the mouse positioned at the corners of the slither.io window.
 
-`python3 slither.py` from within `pySlither/slither/`.
+### Running
+
+`python3 slither.py` from within `pySlither/slither/`. `python3 slither.py -c` to create the config file.
 
 Press `q` to exit the mouse control.
 

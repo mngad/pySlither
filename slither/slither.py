@@ -1,6 +1,8 @@
 import pyautogui
 import time
 import cv2
+import sys
+import getopt
 from PIL import ImageGrab
 import numpy as np
 import imutils
@@ -9,16 +11,40 @@ from opponent_detection import Opponent
 from food_detection import FoodDetection
 import helper as hlp
 
+def read_args(args):
+    bbox = None
+    if args:
+        if args[0] == "-c":
+            bbox = hlp.get_screen_bounds()
+            hlp.write_conf(bbox)
+    else: bbox = hlp.open_conf()
+    return bbox
 
-if __name__ == "__main__":
+
+
+
+def main(argv):
     try:
-        screen_grab = ScreenGrab()
-        bbox = screen_grab.extent
 
-        width = int(screen_grab.img.shape[1])
-        height = int(screen_grab.img.shape[0])
-        midwidth = int(screen_grab.img.shape[1]/2)
-        midheight = int(screen_grab.img.shape[0]/2)
+        # try:
+        #     opts = getopt.getopt(argv,"h:conf:")
+        # except getopt.GetoptError:
+        #     print('test.py -conf')
+        #     sys.exit(2)
+        # for opt, arg in opts:
+        #     if opt == '-h':
+        #         print 'test.py -conf'
+        #         sys.exit()
+        #     elif opt in ("--conf", "-c"):
+        bbox = read_args(argv)
+        screen_grab = ScreenGrab(bbox)
+
+        print(bbox)
+
+        width = int(screen_grab.get_scr().shape[1])
+        height = int(screen_grab.get_scr().shape[0])
+        midwidth = int(screen_grab.get_scr().shape[1]/2)
+        midheight = int(screen_grab.get_scr().shape[0]/2)
         captEdgeDistX = bbox[0]  # for mouse movements
         captEdgeDistY = bbox[1]  # for mouse movements
         marker_color = (255, 0, 255)
@@ -31,14 +57,15 @@ if __name__ == "__main__":
                 #cv2.imread("../big_blob.png", cv2.IMREAD_UNCHANGED)]
 
         while True:
-            ogimg = ScreenGrab()
+            ogimg = ScreenGrab(bbox)
+            og_img = ogimg.get_scr()
             opponent = Opponent(midwidth,
                                 midheight,
-                                ogimg.img,
+                                og_img,
                                 ogimg.colour_threshold())
             opponent.findSnakeContours()
 
-            food = FoodDetection(needle, ogimg.img, midwidth, midheight)
+            food = FoodDetection(needle, og_img, midwidth, midheight)
             food.find(threshold=0.65, debug_mode='rectangles')
             food.get_closest_point(sm=90000, cp=400)
             img = food.food_vis_img
@@ -102,3 +129,7 @@ if __name__ == "__main__":
                 break
     except KeyboardInterrupt:
         print('done')
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

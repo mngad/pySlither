@@ -1,3 +1,5 @@
+*.conf
+#ignore config file - should be user specific
 *.swp
 #ignore notebook checkpoints
 .ipnyb_checkpoints
